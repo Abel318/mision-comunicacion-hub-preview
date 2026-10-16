@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Misión Comunicación · Preview del hub</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#0e1719;font-family:Inter,system-ui,Segoe UI,sans-serif}
+  #renderCanvas{width:100%;height:100%;touch-action:none;display:block}
+  .overlay{position:fixed;inset:0;pointer-events:none;color:#f2f1e8}
+  .brand{position:absolute;left:28px;top:24px;font-weight:650;letter-spacing:.02em}
+  .brand small{display:block;margin-top:3px;font-size:10px;letter-spacing:.18em;opacity:.66}
+  .intro{position:absolute;left:52px;top:118px;max-width:430px}
+  .intro .eyebrow{font-size:11px;letter-spacing:.22em;opacity:.72}
+  .intro h1{font-size:36px;line-height:1.02;margin:13px 0 10px;font-weight:620}
+  .intro p{font-size:15px;opacity:.85;margin:0}
+  .controls{position:absolute;left:28px;bottom:22px;font-size:12px;opacity:.78}
+  .badge{position:absolute;right:24px;top:22px;padding:8px 11px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(12,23,26,.5);font-size:12px}
+</style>
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+</head>
+<body>
+<canvas id="renderCanvas"></canvas>
+<div class="overlay">
+  <div class="brand">Misión Comunicación<small>PREVIEW VISUAL DEL HUB</small></div>
+  <div class="intro">
+    <div class="eyebrow">ELIGE TU EXPERIENCIA</div>
+    <h1>Tres situaciones.<br>Tu manera de comunicar.</h1>
+    <p>Prueba visual pública temporal de la rama dev. No incluye IA, voz ni datos reales.</p>
+  </div>
+  <div class="controls">WASD o flechas: caminar · arrastrar con el ratón: mirar</div>
+  <div class="badge">Preview · dev</div>
+</div>
+<script>
+const canvas=document.getElementById("renderCanvas");
+const engine=new BABYLON.Engine(canvas,true,{preserveDrawingBuffer:false,stencil:true});
+engine.setHardwareScalingLevel(Math.max(1,window.devicePixelRatio/1.5));
+const scene=new BABYLON.Scene(engine);
+scene.clearColor=new BABYLON.Color4(.055,.085,.095,1);
+scene.imageProcessingConfiguration.toneMappingEnabled=true;
+scene.imageProcessingConfiguration.toneMappingType=BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
+scene.imageProcessingConfiguration.exposure=1.03;
+scene.imageProcessingConfiguration.contrast=1.08;
+
+const camera=new BABYLON.UniversalCamera("Cámara",new BABYLON.Vector3(-1,1.65,-4.2),scene);
+camera.minZ=.1;camera.fov=1.26;camera.attachControl(canvas,true);
+camera.speed=.18;camera.angularSensibility=3500;
+camera.keysUp=[87,38];camera.keysDown=[83,40];camera.keysLeft=[65,37];camera.keysRight=[68,39];
+
+const mat=(name,color,rough=.7,metal=0)=>{const m=new BABYLON.PBRMaterial(name,scene);m.albedoColor=BABYLON.Color3.FromHexString(color);m.roughness=rough;m.metallic=metal;return m};
+const wall=mat("Piedra clara","#d7dad4",.88), floor=mat("Pavimento mineral","#707d7e",.42), oak=mat("Madera nogal","#76543f",.58), graphite=mat("Aluminio oscuro","#263c43",.32,.62), teal=mat("Panel acústico","#31515b",.7), brass=mat("Latón","#c5b181",.3,.7), soft=mat("Tapicería","#536567",.92), rug=mat("Alfombra","#6d7470",.96);
+const ambient=new BABYLON.HemisphericLight("Luz cielo",new BABYLON.Vector3(0,1,0),scene);ambient.intensity=.72;ambient.diffuse=new BABYLON.Color3(.88,.94,.96);ambient.groundColor=new BABYLON.Color3(.22,.27,.29);
+const sun=new BABYLON.DirectionalLight("Luz lateral",new BABYLON.Vector3(.6,-1,.5),scene);sun.position.set(-5,8,-4);sun.intensity=2.15;sun.diffuse=BABYLON.Color3.FromHexString("#fff0d8");
+const shadow=new BABYLON.ShadowGenerator(1024,sun);shadow.useBlurExponentialShadowMap=true;shadow.blurKernel=24;
+
+function box(name,w,h,d,x,y,z,m){const mesh=BABYLON.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);mesh.position.set(x,y,z);mesh.material=m;mesh.receiveShadows=true;shadow.addShadowCaster(mesh);return mesh}
+function sign(text,x,y,z,w=2.5,rotY=0){const t=new BABYLON.DynamicTexture(text,{width:1024,height:256},scene,false);const c=t.getContext();c.fillStyle="#20383e";c.fillRect(0,0,1024,256);c.fillStyle="#e7e8dd";c.font="48px sans-serif";c.textAlign="center";c.fillText(text,512,147);t.update();const m=new BABYLON.StandardMaterial("Rótulo "+text,scene);m.diffuseTexture=t;m.emissiveColor=new BABYLON.Color3(.7,.7,.7);const p=BABYLON.MeshBuilder.CreatePlane(text,{width:w,height:w/4},scene);p.position.set(x,y,z);p.rotation.y=rotY;p.material=m;return p}
+
+box("Suelo",8,.16,10,0,-.1,0,floor);box("Fondo",8,3.5,.18,0,1.75,4.5,wall);box("Pared izquierda",.18,3.5,10,-4,1.75,0,wall);box("Pared derecha",.18,3.5,10,4,1.75,0,wall);box("Pared trasera",8,3.5,.18,0,1.75,-5,wall);box("Techo",8,.1,10,0,3.55,0,wall);
+for(let z=-4.5;z<4.5;z+=1.2)box("Junta",8,.003,.012,0,.001,z,graphite);
+const glow=mat("Luminaria","#f5eedb",.4);glow.emissiveColor=new BABYLON.Color3(.9,.86,.72);
+for(let x=-3;x<=3;x+=3)box("Línea de luz",.055,.028,7,x,3.46,0,glow);
+for(const z of [-3.7,-1.2,1.3,3.7])box("Foseado de techo",6.7,.035,.055,0,3.43,z,graphite);
+box("Zócalo fondo",7.7,.085,.03,0,.045,4.39,graphite);box("Zócalo trasero",7.7,.085,.03,0,.045,-4.89,graphite);
+
+const glass=mat("Cristal","#b9d1d4",.1,.2);glass.alpha=.35;box("Ventana",.035,2.5,3,-3.86,1.8,.2,glass);
+for(let z=-1.5;z<2;z+=1.1)box("Montante",.08,2.7,.045,-3.8,1.8,z,graphite);
+for(let z=-1;z<3;z++)box("Arquitectura exterior",1.3,4+z*.4,.7,-5.5,1,z,wall);
+
+for(const [x,label] of [[-2.15,"SALA DE ENTREVISTA"],[2.15,"ATENCIÓN AL CLIENTE"]]){
+  box("Acceso "+label,1.8,2.65,.12,x,1.325,4.28,teal);
+  for(const side of [-1,1])box("Jamba",.075,2.8,.2,x+side*.95,1.4,4.12,graphite);
+  box("Dintel",2,.08,.2,x,2.8,4.12,graphite);box("Tirador",.035,.48,.12,x+.65,1.15,4.1,brass);
+  sign(label,x,3.08,4.05,3);sign("DISPONIBLE",x,2.07,4.1,1.3);
+}
+box("Acceso despacho",.12,2.65,1.8,3.86,1.325,-1.5,teal);
+for(const dz of [-.95,.95])box("Jamba despacho",.2,2.8,.075,3.78,1.4,-1.5+dz,graphite);
+box("Dintel despacho",.2,.08,2,3.78,2.8,-1.5,graphite);box("Tirador despacho",.12,.48,.035,3.7,1.15,-.85,brass);
+sign("FEEDBACK DEL RESPONSABLE",3.7,3.08,-1.5,3,Math.PI/2);sign("DISPONIBLE",3.7,2.07,-1.5,1.3,Math.PI/2);
+
+box("Frente recepción",2.45,.86,.55,-.15,.43,-1.0,teal);box("Encimera recepción",2.65,.07,.72,-.15,.9,-1.0,oak);box("Zócalo recepción",2.15,.08,.48,-.15,.05,-1.0,graphite);
+for(let i=0;i<10;i++)box("Listón recepción",.055,.78,.04,-1.05+i*.2,.48,-1.29,oak);
+box("Panel corporativo",3.1,2.25,.08,-.15,1.45,-1.38,graphite);
+sign("MISIÓN COMUNICACIÓN",-.15,1.78,-1.31,2.6,Math.PI);sign("ELIGE UNA EXPERIENCIA",-.15,2.48,-1.32,2.6,Math.PI);
+
+box("Alfombra espera",3.5,.018,2.2,-1.7,.01,-3.2,rug);
+for(const x of [-2.55,-.9]){box("Banco espera asiento",1.15,.16,.62,x,.42,-3.25,soft);box("Banco espera respaldo",1.15,.62,.12,x,.76,-3.52,soft);box("Base banco espera",.95,.22,.45,x,.18,-3.25,graphite)}
+box("Mesa auxiliar espera",.64,.05,.64,-1.72,.48,-2.55,oak);box("Pie mesa auxiliar",.08,.45,.08,-1.72,.24,-2.55,graphite);
+box("Tótem informativo",.72,1.55,.12,2.95,.8,-3.2,graphite);sign("3 MISIONES",2.95,1.25,-3.12,.65,Math.PI);
+box("Franja pared trasera",7.4,1.18,.06,0,2.55,-4.86,oak);sign("ENTORNO DE PRÁCTICA",0,2.65,-4.79,3.4);sign("COMUNICACIÓN PROFESIONAL",0,2.18,-4.78,3.7);
+
+for(const [x,z] of [[-3.4,3.6],[3.4,3.6],[-3.35,-4.1],[3.25,-4.1]]){
+  const pot=BABYLON.MeshBuilder.CreateCylinder("Maceta",{diameter:.48,height:.5,tessellation:32},scene);pot.position.set(x,.25,z);pot.material=graphite;
+  for(let i=0;i<7;i++){const leaf=BABYLON.MeshBuilder.CreateSphere("Follaje",{diameter:.45,segments:12},scene);leaf.scaling.set(.6,1.8,.5);leaf.position.set(x+Math.sin(i)*.17,.85+Math.cos(i)*.12,z+Math.cos(i)*.14);leaf.material=mat("Verde "+x+" "+z+" "+i,"#38574a");shadow.addShadowCaster(leaf)}
+}
+
+const pipeline=new BABYLON.DefaultRenderingPipeline("Luz suave",true,scene,[camera]);pipeline.fxaaEnabled=true;pipeline.bloomEnabled=true;pipeline.bloomThreshold=1.2;pipeline.bloomWeight=.055;pipeline.bloomKernel=32;
+engine.runRenderLoop(()=>scene.render());
+window.addEventListener("resize",()=>engine.resize());
+</script>
+</body>
+</html>
