@@ -10,10 +10,10 @@
   .overlay{position:fixed;inset:0;pointer-events:none;color:#f2f1e8}
   .brand{position:absolute;left:28px;top:24px;font-weight:650;letter-spacing:.02em}
   .brand small{display:block;margin-top:3px;font-size:10px;letter-spacing:.18em;opacity:.66}
-  .intro{position:absolute;left:52px;top:118px;max-width:430px}
-  .intro .eyebrow{font-size:11px;letter-spacing:.22em;opacity:.72}
-  .intro h1{font-size:36px;line-height:1.02;margin:13px 0 10px;font-weight:620}
-  .intro p{font-size:15px;opacity:.85;margin:0}
+  .intro{position:absolute;left:28px;top:84px;max-width:330px;padding:14px 16px;border-radius:14px;background:rgba(9,20,23,.42);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.10)}
+  .intro .eyebrow{font-size:9px;letter-spacing:.22em;opacity:.72}
+  .intro h1{font-size:24px;line-height:1.08;margin:8px 0 7px;font-weight:620}
+  .intro p{font-size:12px;line-height:1.35;opacity:.82;margin:0}
   .controls{position:absolute;left:28px;bottom:22px;font-size:12px;opacity:.78}
   .badge{position:absolute;right:24px;top:22px;padding:8px 11px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(12,23,26,.5);font-size:12px}
 </style>
@@ -39,8 +39,8 @@ const scene=new BABYLON.Scene(engine);
 scene.clearColor=new BABYLON.Color4(.055,.085,.095,1);
 scene.imageProcessingConfiguration.toneMappingEnabled=true;
 scene.imageProcessingConfiguration.toneMappingType=BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-scene.imageProcessingConfiguration.exposure=1.03;
-scene.imageProcessingConfiguration.contrast=1.08;
+scene.imageProcessingConfiguration.exposure=1.08;
+scene.imageProcessingConfiguration.contrast=1.12;
 
 const camera=new BABYLON.UniversalCamera("Cámara",new BABYLON.Vector3(-1,1.65,-4.2),scene);
 camera.minZ=.1;camera.fov=1.26;camera.attachControl(canvas,true);
@@ -48,12 +48,13 @@ camera.speed=.18;camera.angularSensibility=3500;
 camera.keysUp=[87,38];camera.keysDown=[83,40];camera.keysLeft=[65,37];camera.keysRight=[68,39];
 
 const mat=(name,color,rough=.7,metal=0)=>{const m=new BABYLON.PBRMaterial(name,scene);m.albedoColor=BABYLON.Color3.FromHexString(color);m.roughness=rough;m.metallic=metal;return m};
-const wall=mat("Piedra clara","#d7dad4",.88), floor=mat("Pavimento mineral","#707d7e",.42), oak=mat("Madera nogal","#76543f",.58), graphite=mat("Aluminio oscuro","#263c43",.32,.62), teal=mat("Panel acústico","#31515b",.7), brass=mat("Latón","#c5b181",.3,.7), soft=mat("Tapicería","#536567",.92), rug=mat("Alfombra","#6d7470",.96), stoneDark=mat("Piedra gris","#8e9998",.78), paper=mat("Papel cálido","#e6e2d8",.94);
-const ambient=new BABYLON.HemisphericLight("Luz cielo",new BABYLON.Vector3(0,1,0),scene);ambient.intensity=.72;ambient.diffuse=new BABYLON.Color3(.88,.94,.96);ambient.groundColor=new BABYLON.Color3(.22,.27,.29);
-const sun=new BABYLON.DirectionalLight("Luz lateral",new BABYLON.Vector3(.6,-1,.5),scene);sun.position.set(-5,8,-4);sun.intensity=2.15;sun.diffuse=BABYLON.Color3.FromHexString("#fff0d8");
+const wall=mat("Piedra clara","#d1d3ce",.86), floor=mat("Pavimento mineral","#667174",.24), oak=mat("Madera nogal","#7b563b",.48), graphite=mat("Aluminio oscuro","#1f3339",.28,.68), teal=mat("Panel acústico","#24464f",.56), brass=mat("Latón","#c6a86c",.26,.75), soft=mat("Tapicería","#315963",.86), rug=mat("Alfombra","#8b8983",.94), stoneDark=mat("Piedra gris","#929b98",.72), paper=mat("Papel cálido","#e8e2d7",.94), plantMat=mat("Verde interior","#31533f",.72);
+const ambient=new BABYLON.HemisphericLight("Luz cielo",new BABYLON.Vector3(0,1,0),scene);ambient.intensity=.88;ambient.diffuse=new BABYLON.Color3(.88,.94,.96);ambient.groundColor=new BABYLON.Color3(.22,.27,.29);
+const sun=new BABYLON.DirectionalLight("Luz lateral",new BABYLON.Vector3(.6,-1,.5),scene);sun.position.set(-5,8,-4);sun.intensity=2.45;sun.diffuse=BABYLON.Color3.FromHexString("#fff0d8");
 const shadow=new BABYLON.ShadowGenerator(1024,sun);shadow.useBlurExponentialShadowMap=true;shadow.blurKernel=24;
 
 function box(name,w,h,d,x,y,z,m){const mesh=BABYLON.MeshBuilder.CreateBox(name,{width:w,height:h,depth:d},scene);mesh.position.set(x,y,z);mesh.material=m;mesh.receiveShadows=true;shadow.addShadowCaster(mesh);return mesh}
+function cyl(name,d,h,x,y,z,m){const mesh=BABYLON.MeshBuilder.CreateCylinder(name,{diameter:d,height:h,tessellation:32},scene);mesh.position.set(x,y,z);mesh.material=m;mesh.receiveShadows=true;shadow.addShadowCaster(mesh);return mesh}
 function sign(text,x,y,z,w=2.5,rotY=0){const t=new BABYLON.DynamicTexture(text,{width:1024,height:256},scene,false);const c=t.getContext();c.fillStyle="#20383e";c.fillRect(0,0,1024,256);c.fillStyle="#e7e8dd";c.font="48px sans-serif";c.textAlign="center";c.fillText(text,512,147);t.update();const m=new BABYLON.StandardMaterial("Rótulo "+text,scene);m.diffuseTexture=t;m.emissiveColor=new BABYLON.Color3(.7,.7,.7);const p=BABYLON.MeshBuilder.CreatePlane(text,{width:w,height:w/4},scene);p.position.set(x,y,z);p.rotation.y=rotY;p.material=m;return p}
 
 box("Suelo",8,.16,10,0,-.1,0,floor);box("Fondo",8,3.5,.18,0,1.75,4.5,wall);box("Pared izquierda",.18,3.5,10,-4,1.75,0,wall);box("Pared derecha",.18,3.5,10,4,1.75,0,wall);box("Pared trasera",8,3.5,.18,0,1.75,-5,wall);box("Techo",8,.1,10,0,3.55,0,wall);
@@ -78,38 +79,84 @@ for(const dz of [-.95,.95])box("Jamba despacho",.2,2.8,.075,3.78,1.4,-1.5+dz,gra
 box("Dintel despacho",.2,.08,2,3.78,2.8,-1.5,graphite);box("Tirador despacho",.12,.48,.035,3.7,1.15,-.85,brass);
 sign("FEEDBACK DEL RESPONSABLE",3.7,3.08,-1.5,3,Math.PI/2);sign("DISPONIBLE",3.7,2.07,-1.5,1.3,Math.PI/2);
 
-box("Frente recepción",2.45,.86,.55,-.15,.43,-.78,teal);box("Encimera recepción",2.7,.075,.76,-.15,.9,-.78,oak);box("Zócalo recepción",2.2,.08,.48,-.15,.05,-.78,graphite);
-for(let i=0;i<10;i++)box("Listón recepción",.055,.78,.04,-1.05+i*.2,.48,-1.07,oak);
-box("Panel corporativo",3.2,2.25,.09,-.15,1.45,-1.18,graphite);
-sign("MISIÓN COMUNICACIÓN",-.15,1.78,-1.12,2.65,Math.PI);sign("ELIGE UNA EXPERIENCIA",-.15,2.47,-1.11,2.65,Math.PI);
+// V2 del hall: composición abierta, pórticos, madera, piedra y luz cálida.
+box("Banda frontal corporativa",7.45,.72,.10,0,3.14,4.30,graphite);
+for(const x of [-3.55,-3.33,-3.11,-.98,-.76,-.54,.54,.76,.98,3.11,3.33,3.55]) box("Listón vertical frontal",.075,2.95,.10,x,1.48,4.18,oak);
+for(const x of [-3.44,-3.22,-.87,-.65,.65,.87,3.22,3.44]) box("Luz vertical frontal",.024,2.45,.06,x,1.52,4.10,glow);
 
-for(const x of [-2.15,2.15]){box("Pilar acceso",.23,3.12,.38,x-.99,1.56,4.03,stoneDark);box("Pilar acceso",.23,3.12,.38,x+.99,1.56,4.03,stoneDark);box("Cornisa acceso",2.2,.22,.38,x,3.0,4.03,stoneDark)}
-box("Pilar despacho A",.38,3.12,.23,3.68,1.56,-2.49,stoneDark);box("Pilar despacho B",.38,3.12,.23,3.68,1.56,-.51,stoneDark);box("Cornisa despacho",.38,.22,2.2,3.68,3.0,-1.5,stoneDark);
+for(const x of [-2.15,2.15]){
+  box("Pilar pétreo acceso",.28,3.10,.42,x-.99,1.55,4.03,stoneDark);
+  box("Pilar pétreo acceso",.28,3.10,.42,x+.99,1.55,4.03,stoneDark);
+  box("Cornisa pétrea acceso",2.24,.24,.42,x,3.02,4.03,stoneDark);
+  box("Panel cabecera acceso",2.10,.46,.12,x,3.12,3.94,graphite);
+}
+box("Pilar despacho A",.42,3.10,.28,3.68,1.55,-2.49,stoneDark);
+box("Pilar despacho B",.42,3.10,.28,3.68,1.55,-.51,stoneDark);
+box("Cornisa despacho",.42,.24,2.24,3.68,3.02,-1.5,stoneDark);
+for(const z of [-2.84,-2.62,-.38,-.16]) box("Listón despacho",.08,2.75,.075,3.72,1.45,z,oak);
 
-box("Alfombra espera",3.65,.018,2.3,-1.72,.01,-3.18,rug);
-for(const x of [-2.55,-.9]){box("Banco espera asiento",1.18,.18,.64,x,.43,-3.22,soft);box("Banco espera respaldo",1.18,.66,.13,x,.78,-3.51,soft);box("Base banco espera",.98,.2,.46,x,.18,-3.22,graphite)}
-const aux=BABYLON.MeshBuilder.CreateCylinder("Mesa auxiliar espera",{diameter:.68,height:.055,tessellation:32},scene);aux.position.set(-1.72,.49,-2.5);aux.material=oak;
-const auxLeg=BABYLON.MeshBuilder.CreateCylinder("Pie mesa auxiliar",{diameter:.10,height:.46,tessellation:32},scene);auxLeg.position.set(-1.72,.25,-2.5);auxLeg.material=graphite;
-const auxBase=BABYLON.MeshBuilder.CreateCylinder("Base mesa auxiliar",{diameter:.42,height:.035,tessellation:32},scene);auxBase.position.set(-1.72,.03,-2.5);auxBase.material=graphite;
-box("Revistero",.42,.04,.3,-1.58,.53,-2.5,paper);
+for(const [name,x,z] of [["Luz entrevista",-2.15,3.25],["Luz cliente",2.15,3.25],["Luz recepción",2.6,-3.1],["Luz espera",-2.35,-3.0]]){
+  const l=new BABYLON.PointLight(name,new BABYLON.Vector3(x,2.55,z),scene);
+  l.diffuse=BABYLON.Color3.FromHexString("#ffd9ad");l.intensity=.82;l.range=4.4;
+}
 
-box("Franja pared trasera",7.4,1.22,.065,0,2.55,-4.86,oak);
-for(let x=-3.45;x<=3.45;x+=.23)box("Listón pared trasera",.06,1.08,.07,x,2.55,-4.80,oak);
-sign("ENTORNO DE PRÁCTICA",0,2.67,-4.72,3.5);sign("COMUNICACIÓN PROFESIONAL",0,2.18,-4.71,3.85);
+// Techo de listones sobre la zona de llegada.
+for(let x=-3.55;x<=3.55;x+=.24) box("Listón techo hub",.075,.12,2.55,x,3.38,-3.45,oak);
+for(const x of [-3.42,-1.70,0,1.70,3.42]) box("Luz techo hub",.035,.028,2.62,x,3.31,-3.45,glow);
 
-box("Tótem informativo",.76,1.6,.14,2.95,.82,-3.2,graphite);sign("3 MISIONES",2.95,1.3,-3.11,.66,Math.PI);
-for(const [x,z] of [[-3.15,-2.25],[3.05,-3.75]]){const p=BABYLON.MeshBuilder.CreateCylinder("Lámpara pie",{diameter:.08,height:1.35,tessellation:24},scene);p.position.set(x,.68,z);p.material=graphite;const sh=BABYLON.MeshBuilder.CreateCylinder("Pantalla lámpara",{diameter:.34,height:.38,tessellation:24},scene);sh.position.set(x,1.48,z);sh.material=brass}
-box("Panel piedra lateral",.08,2.35,2.5,-3.83,1.55,-3.15,stoneDark);
-box("Panel madera lateral",.09,2.35,2.3,3.82,1.55,-3.65,oak);
-const ht=BABYLON.MeshBuilder.CreateCylinder("Mesa alta",{diameter:.58,height:.06,tessellation:32},scene);ht.position.set(2.18,.92,-2.55);ht.material=oak;
-const hl=BABYLON.MeshBuilder.CreateCylinder("Pie mesa alta",{diameter:.10,height:.85,tessellation:32},scene);hl.position.set(2.18,.46,-2.55);hl.material=graphite;
+// Recepción lateral: mantiene libre el eje central.
+box("Frente recepción",2.35,.86,.58,2.52,.43,-3.42,teal);
+box("Encimera recepción",2.58,.075,.78,2.52,.90,-3.42,oak);
+box("Zócalo recepción",2.12,.08,.48,2.52,.05,-3.42,graphite);
+for(let i=0;i<10;i++) box("Listón recepción",.055,.76,.04,1.62+i*.20,.48,-3.72,oak);
+box("Panel recepción",2.70,1.55,.08,2.52,1.85,-4.12,teal);
+sign("MISIÓN COMUNICACIÓN",2.52,2.12,-4.03,2.25,Math.PI);
+sign("ENTORNO DE PRÁCTICA",2.52,1.70,-4.02,2.05,Math.PI);
+box("Pantalla recepción",.58,.38,.05,2.20,1.16,-3.46,graphite);
+box("Base pantalla recepción",.10,.22,.10,2.20,.99,-3.46,graphite);
+box("Portadocumentos",.32,.12,.22,2.82,.99,-3.40,paper);
+
+// Zona lounge a la izquierda.
+box("Alfombra espera",3.35,.018,2.25,-2.05,.01,-3.25,rug);
+for(const x of [-2.82,-1.48]){
+  box("Asiento lounge",1.05,.20,.72,x,.42,-3.25,soft);
+  box("Respaldo lounge",1.05,.72,.16,x,.83,-3.56,soft);
+  box("Zócalo lounge",.88,.16,.52,x,.17,-3.25,graphite);
+}
+cyl("Mesa centro lounge",.82,.055,-2.14,.48,-2.48,oak);
+cyl("Pie mesa lounge",.11,.44,-2.14,.24,-2.48,graphite);
+cyl("Base mesa lounge",.48,.035,-2.14,.03,-2.48,graphite);
+box("Revistas lounge",.46,.035,.30,-2.03,.53,-2.48,paper);
+
+// Jardinera baja con vegetación más densa.
+cyl("Jardinera baja",1.35,.34,-3.05,.17,-1.78,oak);
+cyl("Macetero central",.82,.50,-3.05,.42,-1.78,graphite);
+for(let i=0;i<10;i++){
+  const a=i/10*Math.PI*2;
+  const leaf=BABYLON.MeshBuilder.CreateSphere("Vegetación jardinera",{diameter:.48,segments:12},scene);
+  leaf.scaling.set(.48,1.55,.42);leaf.position.set(-3.05+Math.cos(a)*.25,.88+(i%3)*.08,-1.78+Math.sin(a)*.25);
+  leaf.rotation.z=Math.cos(a)*.28;leaf.material=plantMat;shadow.addShadowCaster(leaf);
+}
+
+// Revestimientos laterales y marca posterior.
+box("Panel información",1.30,1.72,.09,-3.80,1.33,-3.52,graphite);
+sign("3 EXPERIENCIAS",-3.73,1.72,-3.52,1.05,-Math.PI/2);
+box("Revestimiento izquierdo",.10,2.35,2.45,-3.82,1.45,-3.30,stoneDark);
+box("Revestimiento derecho",.10,2.35,2.45,3.82,1.45,-3.65,oak);
+box("Muro marca posterior",4.25,1.25,.08,-.45,2.45,-4.84,teal);
+sign("COMUNICACIÓN PROFESIONAL",-.45,2.55,-4.76,3.65,Math.PI);
+for(let x=-3.2;x<=2.3;x+=.24) box("Listón mural posterior",.06,1.12,.08,x,2.45,-4.79,oak);
+
+cyl("Mesa alta",.56,.055,.98,.92,-2.30,oak);
+cyl("Pie mesa alta",.09,.84,.98,.46,-2.30,graphite);
+cyl("Base mesa alta",.38,.03,.98,.03,-2.30,graphite);
 
 for(const [x,z] of [[-3.4,3.6],[3.4,3.6],[-3.35,-4.1],[3.25,-4.1]]){
   const pot=BABYLON.MeshBuilder.CreateCylinder("Maceta",{diameter:.48,height:.5,tessellation:32},scene);pot.position.set(x,.25,z);pot.material=graphite;
   for(let i=0;i<7;i++){const leaf=BABYLON.MeshBuilder.CreateSphere("Follaje",{diameter:.45,segments:12},scene);leaf.scaling.set(.6,1.8,.5);leaf.position.set(x+Math.sin(i)*.17,.85+Math.cos(i)*.12,z+Math.cos(i)*.14);leaf.material=mat("Verde "+x+" "+z+" "+i,"#38574a");shadow.addShadowCaster(leaf)}
 }
 
-const pipeline=new BABYLON.DefaultRenderingPipeline("Luz suave",true,scene,[camera]);pipeline.fxaaEnabled=true;pipeline.bloomEnabled=true;pipeline.bloomThreshold=1.2;pipeline.bloomWeight=.055;pipeline.bloomKernel=32;
+const pipeline=new BABYLON.DefaultRenderingPipeline("Luz suave",true,scene,[camera]);pipeline.fxaaEnabled=true;pipeline.bloomEnabled=true;pipeline.bloomThreshold=1.2;pipeline.bloomWeight=.085;pipeline.bloomKernel=32;
 engine.runRenderLoop(()=>scene.render());
 window.addEventListener("resize",()=>engine.resize());
 </script>
