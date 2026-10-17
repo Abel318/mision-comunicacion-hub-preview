@@ -184,7 +184,7 @@ for(const [x,z] of [[-3.4,3.6],[3.4,3.6],[-3.35,-4.1],[3.25,-4.1]]){
 async function replaceFrontLeftPlant(){
   try{
     const container=await BABYLON.SceneLoader.LoadAssetContainerAsync(
-      "https://cdn.3dassets.dev/assets/34951/v1/","model.glb",scene
+      "https://raw.githubusercontent.com/yadneshSalvi/hearth-webmcp/main/public/assets/glb/","plant-fig.glb",scene
     );
     const entries=container.instantiateModelsToScene(n=>"preview-plant/"+n,false,{doNotInstantiate:false});
     const root=new BABYLON.TransformNode("preview-plant-front-left",scene);
