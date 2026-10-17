@@ -197,7 +197,7 @@ async function replaceFrontLeftPlant(){
       for(const m of meshes){m.computeWorldMatrix(true);const b=m.getBoundingInfo().boundingBox;min.minimizeInPlace(b.minimumWorld);max.maximizeInPlace(b.maximumWorld)}
       return {min,max,size:max.subtract(min)};
     };
-    const original=bounds();root.scaling.setAll(1.08/original.size.y);
+    const original=bounds();root.scaling.setAll(1.32/original.size.y);
     const fitted=bounds();
     if(fitted.size.x>.8||fitted.size.z>.8) throw new Error("Huella excesiva");
     root.position.set(-3.4-(fitted.min.x+fitted.max.x)/2,-.02-fitted.min.y,3.6-(fitted.min.z+fitted.max.z)/2);
