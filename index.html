@@ -18,6 +18,7 @@
   .badge{position:absolute;right:24px;top:22px;padding:8px 11px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(12,23,26,.5);font-size:12px}
 </style>
 <script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 </head>
 <body>
 <canvas id="renderCanvas"></canvas>
@@ -172,10 +173,41 @@ cyl("Mesa alta",.56,.055,.98,.92,-2.30,oak);
 cyl("Pie mesa alta",.09,.84,.98,.46,-2.30,graphite);
 cyl("Base mesa alta",.38,.03,.98,.03,-2.30,graphite);
 
+const fallbackPlants=[];
 for(const [x,z] of [[-3.4,3.6],[3.4,3.6],[-3.35,-4.1],[3.25,-4.1]]){
-  const pot=BABYLON.MeshBuilder.CreateCylinder("Maceta",{diameterTop:.42,diameterBottom:.56,height:.5,tessellation:32},scene);pot.position.set(x,.25,z);pot.material=graphite;
-  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;const leaf=BABYLON.MeshBuilder.CreateSphere("Follaje",{diameter:.42,segments:12},scene);leaf.scaling.set(.40,1.9,.28);leaf.rotation.z=Math.cos(a)*.48;leaf.rotation.x=Math.sin(a)*.18;leaf.position.set(x+Math.cos(a)*.22,.82+(i%3)*.11,z+Math.sin(a)*.22);leaf.material=plantMat;shadow.addShadowCaster(leaf)}
+  const fallback=[];
+  const pot=BABYLON.MeshBuilder.CreateCylinder("Maceta",{diameterTop:.42,diameterBottom:.56,height:.5,tessellation:32},scene);pot.position.set(x,.25,z);pot.material=graphite;fallback.push(pot);
+  for(let i=0;i<10;i++){const a=i/10*Math.PI*2;const leaf=BABYLON.MeshBuilder.CreateSphere("Follaje",{diameter:.42,segments:12},scene);leaf.scaling.set(.40,1.9,.28);leaf.rotation.z=Math.cos(a)*.48;leaf.rotation.x=Math.sin(a)*.18;leaf.position.set(x+Math.cos(a)*.22,.82+(i%3)*.11,z+Math.sin(a)*.22);leaf.material=plantMat;shadow.addShadowCaster(leaf);fallback.push(leaf)}
+  fallbackPlants.push(fallback);
 }
+
+async function replaceFrontLeftPlant(){
+  try{
+    const container=await BABYLON.SceneLoader.LoadAssetContainerAsync(
+      "https://cdn.3dassets.dev/assets/34951/v1/","model.glb",scene
+    );
+    const entries=container.instantiateModelsToScene(n=>"preview-plant/"+n,false,{doNotInstantiate:false});
+    const root=new BABYLON.TransformNode("preview-plant-front-left",scene);
+    for(const node of entries.rootNodes) node.parent=root;
+    const meshes=root.getChildMeshes().filter(m=>m.getTotalVertices()>0);
+    if(!meshes.length) throw new Error("GLB sin geometría");
+    const bounds=()=>{
+      root.computeWorldMatrix(true);
+      const min=new BABYLON.Vector3(Infinity,Infinity,Infinity),max=new BABYLON.Vector3(-Infinity,-Infinity,-Infinity);
+      for(const m of meshes){m.computeWorldMatrix(true);const b=m.getBoundingInfo().boundingBox;min.minimizeInPlace(b.minimumWorld);max.maximizeInPlace(b.maximumWorld)}
+      return {min,max,size:max.subtract(min)};
+    };
+    const original=bounds();root.scaling.setAll(1.08/original.size.y);
+    const fitted=bounds();
+    if(fitted.size.x>.8||fitted.size.z>.8) throw new Error("Huella excesiva");
+    root.position.set(-3.4-(fitted.min.x+fitted.max.x)/2,-.02-fitted.min.y,3.6-(fitted.min.z+fitted.max.z)/2);
+    for(const m of meshes){m.isPickable=false;m.checkCollisions=false;m.receiveShadows=true;shadow.addShadowCaster(m,false)}
+    for(const m of fallbackPlants[0]){shadow.removeShadowCaster(m,false);m.setEnabled(false)}
+  }catch(err){
+    console.warn("No se pudo cargar la planta GLB; se conserva el fallback.",err);
+  }
+}
+void replaceFrontLeftPlant();
 
 const pipeline=new BABYLON.DefaultRenderingPipeline("Luz suave",true,scene,[camera]);pipeline.fxaaEnabled=true;pipeline.bloomEnabled=true;pipeline.bloomThreshold=1.2;pipeline.bloomWeight=.085;pipeline.bloomKernel=32;
 engine.runRenderLoop(()=>scene.render());
