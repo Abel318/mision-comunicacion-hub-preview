@@ -48,7 +48,7 @@ camera.speed=.18;camera.angularSensibility=3500;
 camera.keysUp=[87,38];camera.keysDown=[83,40];camera.keysLeft=[65,37];camera.keysRight=[68,39];
 
 const mat=(name,color,rough=.7,metal=0)=>{const m=new BABYLON.PBRMaterial(name,scene);m.albedoColor=BABYLON.Color3.FromHexString(color);m.roughness=rough;m.metallic=metal;return m};
-const wall=mat("Piedra clara","#d7dad4",.88), floor=mat("Pavimento mineral","#707d7e",.42), oak=mat("Madera nogal","#76543f",.58), graphite=mat("Aluminio oscuro","#263c43",.32,.62), teal=mat("Panel acústico","#31515b",.7), brass=mat("Latón","#c5b181",.3,.7), soft=mat("Tapicería","#536567",.92), rug=mat("Alfombra","#6d7470",.96);
+const wall=mat("Piedra clara","#d7dad4",.88), floor=mat("Pavimento mineral","#707d7e",.42), oak=mat("Madera nogal","#76543f",.58), graphite=mat("Aluminio oscuro","#263c43",.32,.62), teal=mat("Panel acústico","#31515b",.7), brass=mat("Latón","#c5b181",.3,.7), soft=mat("Tapicería","#536567",.92), rug=mat("Alfombra","#6d7470",.96), stoneDark=mat("Piedra gris","#8e9998",.78), paper=mat("Papel cálido","#e6e2d8",.94);
 const ambient=new BABYLON.HemisphericLight("Luz cielo",new BABYLON.Vector3(0,1,0),scene);ambient.intensity=.72;ambient.diffuse=new BABYLON.Color3(.88,.94,.96);ambient.groundColor=new BABYLON.Color3(.22,.27,.29);
 const sun=new BABYLON.DirectionalLight("Luz lateral",new BABYLON.Vector3(.6,-1,.5),scene);sun.position.set(-5,8,-4);sun.intensity=2.15;sun.diffuse=BABYLON.Color3.FromHexString("#fff0d8");
 const shadow=new BABYLON.ShadowGenerator(1024,sun);shadow.useBlurExponentialShadowMap=true;shadow.blurKernel=24;
@@ -78,16 +78,31 @@ for(const dz of [-.95,.95])box("Jamba despacho",.2,2.8,.075,3.78,1.4,-1.5+dz,gra
 box("Dintel despacho",.2,.08,2,3.78,2.8,-1.5,graphite);box("Tirador despacho",.12,.48,.035,3.7,1.15,-.85,brass);
 sign("FEEDBACK DEL RESPONSABLE",3.7,3.08,-1.5,3,Math.PI/2);sign("DISPONIBLE",3.7,2.07,-1.5,1.3,Math.PI/2);
 
-box("Frente recepción",2.45,.86,.55,-.15,.43,-1.0,teal);box("Encimera recepción",2.65,.07,.72,-.15,.9,-1.0,oak);box("Zócalo recepción",2.15,.08,.48,-.15,.05,-1.0,graphite);
-for(let i=0;i<10;i++)box("Listón recepción",.055,.78,.04,-1.05+i*.2,.48,-1.29,oak);
-box("Panel corporativo",3.1,2.25,.08,-.15,1.45,-1.38,graphite);
-sign("MISIÓN COMUNICACIÓN",-.15,1.78,-1.31,2.6,Math.PI);sign("ELIGE UNA EXPERIENCIA",-.15,2.48,-1.32,2.6,Math.PI);
+box("Frente recepción",2.45,.86,.55,-.15,.43,-.78,teal);box("Encimera recepción",2.7,.075,.76,-.15,.9,-.78,oak);box("Zócalo recepción",2.2,.08,.48,-.15,.05,-.78,graphite);
+for(let i=0;i<10;i++)box("Listón recepción",.055,.78,.04,-1.05+i*.2,.48,-1.07,oak);
+box("Panel corporativo",3.2,2.25,.09,-.15,1.45,-1.18,graphite);
+sign("MISIÓN COMUNICACIÓN",-.15,1.78,-1.12,2.65,Math.PI);sign("ELIGE UNA EXPERIENCIA",-.15,2.47,-1.11,2.65,Math.PI);
 
-box("Alfombra espera",3.5,.018,2.2,-1.7,.01,-3.2,rug);
-for(const x of [-2.55,-.9]){box("Banco espera asiento",1.15,.16,.62,x,.42,-3.25,soft);box("Banco espera respaldo",1.15,.62,.12,x,.76,-3.52,soft);box("Base banco espera",.95,.22,.45,x,.18,-3.25,graphite)}
-box("Mesa auxiliar espera",.64,.05,.64,-1.72,.48,-2.55,oak);box("Pie mesa auxiliar",.08,.45,.08,-1.72,.24,-2.55,graphite);
-box("Tótem informativo",.72,1.55,.12,2.95,.8,-3.2,graphite);sign("3 MISIONES",2.95,1.25,-3.12,.65,Math.PI);
-box("Franja pared trasera",7.4,1.18,.06,0,2.55,-4.86,oak);sign("ENTORNO DE PRÁCTICA",0,2.65,-4.79,3.4);sign("COMUNICACIÓN PROFESIONAL",0,2.18,-4.78,3.7);
+for(const x of [-2.15,2.15]){box("Pilar acceso",.23,3.12,.38,x-.99,1.56,4.03,stoneDark);box("Pilar acceso",.23,3.12,.38,x+.99,1.56,4.03,stoneDark);box("Cornisa acceso",2.2,.22,.38,x,3.0,4.03,stoneDark)}
+box("Pilar despacho A",.38,3.12,.23,3.68,1.56,-2.49,stoneDark);box("Pilar despacho B",.38,3.12,.23,3.68,1.56,-.51,stoneDark);box("Cornisa despacho",.38,.22,2.2,3.68,3.0,-1.5,stoneDark);
+
+box("Alfombra espera",3.65,.018,2.3,-1.72,.01,-3.18,rug);
+for(const x of [-2.55,-.9]){box("Banco espera asiento",1.18,.18,.64,x,.43,-3.22,soft);box("Banco espera respaldo",1.18,.66,.13,x,.78,-3.51,soft);box("Base banco espera",.98,.2,.46,x,.18,-3.22,graphite)}
+const aux=BABYLON.MeshBuilder.CreateCylinder("Mesa auxiliar espera",{diameter:.68,height:.055,tessellation:32},scene);aux.position.set(-1.72,.49,-2.5);aux.material=oak;
+const auxLeg=BABYLON.MeshBuilder.CreateCylinder("Pie mesa auxiliar",{diameter:.10,height:.46,tessellation:32},scene);auxLeg.position.set(-1.72,.25,-2.5);auxLeg.material=graphite;
+const auxBase=BABYLON.MeshBuilder.CreateCylinder("Base mesa auxiliar",{diameter:.42,height:.035,tessellation:32},scene);auxBase.position.set(-1.72,.03,-2.5);auxBase.material=graphite;
+box("Revistero",.42,.04,.3,-1.58,.53,-2.5,paper);
+
+box("Franja pared trasera",7.4,1.22,.065,0,2.55,-4.86,oak);
+for(let x=-3.45;x<=3.45;x+=.23)box("Listón pared trasera",.06,1.08,.07,x,2.55,-4.80,oak);
+sign("ENTORNO DE PRÁCTICA",0,2.67,-4.72,3.5);sign("COMUNICACIÓN PROFESIONAL",0,2.18,-4.71,3.85);
+
+box("Tótem informativo",.76,1.6,.14,2.95,.82,-3.2,graphite);sign("3 MISIONES",2.95,1.3,-3.11,.66,Math.PI);
+for(const [x,z] of [[-3.15,-2.25],[3.05,-3.75]]){const p=BABYLON.MeshBuilder.CreateCylinder("Lámpara pie",{diameter:.08,height:1.35,tessellation:24},scene);p.position.set(x,.68,z);p.material=graphite;const sh=BABYLON.MeshBuilder.CreateCylinder("Pantalla lámpara",{diameter:.34,height:.38,tessellation:24},scene);sh.position.set(x,1.48,z);sh.material=brass}
+box("Panel piedra lateral",.08,2.35,2.5,-3.83,1.55,-3.15,stoneDark);
+box("Panel madera lateral",.09,2.35,2.3,3.82,1.55,-3.65,oak);
+const ht=BABYLON.MeshBuilder.CreateCylinder("Mesa alta",{diameter:.58,height:.06,tessellation:32},scene);ht.position.set(2.18,.92,-2.55);ht.material=oak;
+const hl=BABYLON.MeshBuilder.CreateCylinder("Pie mesa alta",{diameter:.10,height:.85,tessellation:32},scene);hl.position.set(2.18,.46,-2.55);hl.material=graphite;
 
 for(const [x,z] of [[-3.4,3.6],[3.4,3.6],[-3.35,-4.1],[3.25,-4.1]]){
   const pot=BABYLON.MeshBuilder.CreateCylinder("Maceta",{diameter:.48,height:.5,tessellation:32},scene);pot.position.set(x,.25,z);pot.material=graphite;
